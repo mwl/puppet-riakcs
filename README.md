@@ -1,0 +1,1 @@
+Remember to download riak-cs and stanchion .deb files to files/
