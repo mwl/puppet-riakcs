@@ -1,12 +1,7 @@
-class riakcs($riak_ip = "127.0.0.1", $riakcshost = $fqdn, $stanchion_ip = "127.0.0.1") {
+class riakcs($riak_ip = "127.0.0.1", $riakcshost = $fqdn, $stanchion_ip = "127.0.0.1") inherits riak {
 	$package_filename = "riak-cs_1.0.1-1_amd64.deb"
-	$package_location = "/opt/packages/${package_filename}"
+	$package_location = "/tmp/${package_filename}"
 	$nodename = "riak-cs@${riakcshost}"
-
-    file {
-        "/opt/packages":
-            ensure => directory,
-    }
 
     file {
         "${package_location}":
@@ -26,7 +21,7 @@ class riakcs($riak_ip = "127.0.0.1", $riakcshost = $fqdn, $stanchion_ip = "127.0
     service {
         "riak-cs":
             ensure => running,
-            require => Package["riak-cs"],
+            require => [Package["riak-cs"], Class["riak"]],
             hasrestart => true,
             hasstatus => true
     }
