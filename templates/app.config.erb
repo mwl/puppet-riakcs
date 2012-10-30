@@ -3,6 +3,11 @@
 [
  %% Riak Moss config
  {riak_moss, [
+              {anonymous_user_creation, true},
+               %% create admin user and replace above with key as below. http://docs.basho.com/riakcs/latest/cookbooks/configuration/Configuring-Riak-CS/
+               %%{admin_key, "LXAAII1MVLI93IN2ZMDD"},
+               %%{admin_secret, "5BE84D7EEA1AEEAACF070A1982DDA74DA0AA5DA7"},
+
               {moss_ip, "0.0.0.0"},
               {moss_port, 8080 } ,
 
@@ -17,9 +22,14 @@
               {moss_root_host, "s3.amazonaws.com"},
               {put_fsm_buffer_size_max, 10485760},
 
-              %% Connection pool
-              %% {FixedSize, OverflowSize}
-              {riakc_pool, {128, 0} },
+              %% Connection pools
+              %% Each pool is specified as a nested
+              %% tuple of {Name, {FixedSize, OverflowSize}}
+              {connection_pools,
+               [
+                {request_pool, {128, 0} },
+                {bucket_list_pool, {5, 0} }
+               ]},
 
               %% Admin user credentials
               {admin_key, "admin-key"},
@@ -38,10 +48,20 @@
               %% twice per period, etc.)
               {access_log_flush_factor, 1},
               
+              %% Additional access log flush trigger - flush after
+              %% this many accesses are recorded, even if the flush
+              %% interval has not expired; integer number of accesses
+              {access_log_flush_size, 1000000},
+
               %% How large each access archive object is. Should be a
               %% multiple of access_log_flush_interval; integer number
               %% of seconds (3600 == 1 hour)
               {access_archive_period, 3600},
+
+              %% How many access logs are allowed to pile up in the
+              %% archiver's queue before it starts skipping to catch
+              %% up; integer number of logs
+              {access_archiver_max_backlog, 2},
 
               %% When to automatically start storage calculation
               %% batches; list of "HHMM" UTC times
@@ -55,7 +75,45 @@
               %% chosen such that each storage_schedule entry falls in
               %% a different period; integer number of seconds
               %% (86400 == 1 day)
-              {storage_archive_period, 86400}
+              {storage_archive_period, 86400},
+
+              %% How many archive periods a user can request in one
+              %% usage read, applied independently to access and
+              %% storage; integer number of intervals (744 == 1 month
+              %% @ 1 hour intervals)
+              {usage_request_limit, 744},
+
+              %% == Riak CS stats HTTP API ==
+
+              %% true = enable the stats HTTP API, false = disable it
+              {riak_cs_stat, true},
+
+              %% == Garbage Collection ==
+
+              %% The number of seconds to retain the block
+              %% for an object after it has been deleted.
+              %% This leeway time is set to give the delete
+              %% indication time to propogate to all replicas.
+              %% 86400 is 24-hours.
+              {leeway_seconds, 86400},
+
+              %% How often the garbage collection daemon
+              %% waits in-between gc batches.
+              %% 900 is 15-minutes.
+              {gc_interval, 900},
+
+              %% How long a move to the garbage
+              %% collection to do list can remain
+              %% failed, before we retry it.
+              %% 21600 is 6-hours.
+              {gc_retry_interval, 21600},
+
+              %% == DTrace ==
+
+              %% If your Erlang virtual machine supports DTrace (or
+              %% user-space SystemTap), set dtrace_support to true.
+              {dtrace_support, false}
+
              ]},
 
  {webmachine, [

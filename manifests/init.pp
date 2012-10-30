@@ -1,5 +1,5 @@
 class riakcs($riak_ip = "127.0.0.1", $riakcshost = $fqdn, $stanchion_ip = "127.0.0.1") inherits riak {
-	$package_filename = "riak-cs_1.0.1-1_amd64.deb"
+	$package_filename = "riak-cs_1.1.0-1_amd64.deb"
 	$package_location = "/tmp/${package_filename}"
 	$nodename = "riak-cs@${riakcshost}"
 
